@@ -209,6 +209,6 @@ What's great is that your extension can take advantage of the pretty much all of
 
 That's pretty much what I wanted to tell you about Brackets for now, folks. I hope that this somewhat high level overview will make you want to know more about this exciting project, and hopefully help you get into Brackets quicker.
 
-For a better, deeper understanding of how Brackets works, I recommend taking a look at the various videos on youtube shot at the [first Brackets hackathon](http://www.youtube.com/watch?v=xm9kSWZyawg&list=PL69EAABFC3B569526&index=2&feature=plpp_video).
+For a better, deeper understanding of how Brackets works, I recommend taking a look at its [wiki](https://github.com/adobe/brackets/wiki) and the various videos on youtube shot at the [first Brackets hackathon](http://www.youtube.com/watch?v=xm9kSWZyawg&list=PL69EAABFC3B569526&index=2&feature=plpp_video).
 
 
