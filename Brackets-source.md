@@ -97,7 +97,9 @@ At the heart of the implementation of Live Development is the `Inspector.js` fil
 The inline editor feature, which makes it possible to overlay some content over code, is implemented through the `MultiRangeInlineEditor` class. This class inherits from `InlineTextEditor` which itself inherits from `InlineWidget`.
 
 However, you don't need to understand all this inheritance chain in details to use such an inline editor. All you have to do is register a provider function to the EditorManager, like this:
-```EditorManager.registerInlineEditProvider(javaScriptFunctionProvider);```
+```
+EditorManager.registerInlineEditProvider(javaScriptFunctionProvider);
+```
 
 This function has to take two parameters: the host editor, and a position object. Position objects are used by CodeMirror, and contain two properties, the line number and the character position. Inside this function, you'll simply instantiate your `MultiRangeInlineEditor`, and pass it the corresponding editor object.
 
