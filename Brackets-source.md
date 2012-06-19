@@ -27,7 +27,7 @@ In terms of file organization, the core Brackets repository has a pretty self ex
 
 A quick look at any javascript file in the repository will answer a now classical question regarding modern web apps. Yes, Brackets javascript code is written using modules. This should be no surprise. Modules are a great way to provide a clear, limited scope, and a proper encapsulation of your javascript code by taking advantage of javascript closures. It's also a great way to provide a basic level of privacy since only the members exposed via the returned object are publicly available.
 
-As you may know, that there are several format proposals for modules, but only two are really used today: CommonJS, and AMD (for *Asynchronous Module Definition*). The Brackets team has chosen a hybrid approach: it uses the CommonJS format inside AMD-compatible wrappers. This was probably done to limit dependencies to either one of the formats.
+As you may know, that there are several format proposals for modules, but only two are really used today: [CommonJS Modules](http://www.commonjs.org/specs/modules/1.0/), and [AMD](https://github.com/amdjs/amdjs-api/wiki/AMD) (for *Asynchronous Module Definition*). The Brackets team has chosen a hybrid approach: it uses the CommonJS format inside AMD-compatible wrappers. This was probably done to limit dependencies to either one of the formats.
 
 ```
 define(function (require, exports, module) {
@@ -49,9 +49,9 @@ define(function (require, exports, module) {
 ```
 
 
-Note that the module parameter is not used: it's only there for commonJS compliance. Also, modules are loaded via the popular script / module loader requireJS. And for more informations on Modules and Module Loaders, I highly recommend reading Addy Osmani's [Writing Modular JavaScript](http://addyosmani.com/writing-modular-js/). By the way, an important thing to keep in mind is that a module, and its corresponding file, may define zero, one, or many classes. So if you're looking for a class definition, don't necessary look for the corresponding file name.
+Note that the module parameter is not used: it's only there for commonJS compliance. Also, modules are loaded via the popular script / module loader [requireJS](http://requirejs.org/). And for more informations on Modules and Module Loaders, I highly recommand reading Addy Osmani's [Writing Modular JavaScript](http://addyosmani.com/writing-modular-js/). By the way, an important thing to keep in mind is that a module, and its corresponding file, may define zero, one, or many classes. So if you're looking for a class definition, don't necessary look for the corresponding file name.
 
-Another interesting bit you might encounter while wandering around the repository is the use of deferred / promise mechanism. This pattern is used to handle asynchronous APIs which are needed if only because of the very nature of the relationship with the native shell. If you're not familiar with this API, I'd recommend reading the related entry in the *jQuery* docs.
+Another interesting bit you might encounter while wandering around the repository is the use of deferred / promise mechanism. This pattern is used to handle asynchronous APIs which are needed if only because of the very nature of the relationship with the native shell. If you're not familiar with this API, I'd recommend reading [the related entry in the *jQuery* docs](http://api.jquery.com/category/deferred-object/).
 
 By the way, in case you're wondering, Brackets does not use any third party micro-architecture framework. You'll find some common concepts such as models, views and controller, but not formalized around a particular mechanism.
 
@@ -62,29 +62,35 @@ Finally, there is a page on the wiki describing [code conventions used for Brack
 
 ## Code edition and document management 
 
-Most of what makes Brackets a tool for actually editing code comes from the use of a great third party project: [CodeMirror]((http://codemirror.net/)). Everything regarding laying out a text document, to representing code and editing it in a proper way, comes from CodeMirror, including syntax highlighting and focus management. To be more accurate, Brackets uses a dedicated fork, [CoreMirror2](https://github.com/adobe/CodeMirror2), but my understanding is CodeMirror committers have begun accepting pull request from the fork.
+Most of what makes Brackets a tool for actually editing code comes from the use of a great third party project: [CodeMirror]((http://codemirror.net/). Everything regarding laying out a text document, to representing code and editing it in a proper way, comes from CodeMirror, including syntax highlighting and focus management. To be more accurate, Brackets uses a dedicated fork, [CoreMirror2](https://github.com/adobe/CodeMirror2), but my understanding is CodeMirror committers have begun accepting pull request from the fork.
 
 Document and project management, however, is handled separately. This is the logic responsible for things like defining a project, a working set, selecting a file and keeping track of open files inside that project. While this may seem trivial when put this way, this is actually a very central part of any software which job is to edit document. 
 
-Several classes are involved in this process, such as the Documents and Editors and their respective Managers, and understanding their relationship is essential to understanding Brackets architecture.
+Several classes are involved in this process, such as `Document`, `Editor` and their respective managers, and understanding their relationship is essential to understand Brackets architecture.
 
-In my understanding, which may be oversimplified, *Documents* represent files in a read-only manner, *Editors* can edit those documents, and their respective managers create, delete, and give a central access for all documents and editors. Documents and Editors have a one to many relationship (one Document may be edited by several Editors).
+While a *Document* represents a file and its content, an *Editor* exposes methods to edit this document. *Documents* and *Editors* have a one to many relationship (one *Document* may be edited by several *Editors*). You can see the `Document` as a model, and the `Editor` as a middle-man between a view and the `Document` object it represents (some might call that a controller, even if that's not technically correct).
 
-There are several ways to access documents. For instance, to access the current document, you can ask the 'DocumentManager':
+The `DocumentManager` and the `EditorManager` classes create, delete, and give a central access for all documents and editors, respectively. For instance, to access the current document, you can ask the *DocumentManager*:
 
 ```var currentDoc = DocumentManager.getCurrentDocument();```
 
-But since editors keep track of the document they edit, and the 'EditorManager' manages all editors, you could also go this way:
+But since *Editors* keep track of the document they edit, and the *EditorManager* manages all editors, you could also go this way:
 
 ```var currentDoc = EditorManager.getFocusedEditor().document;```
 
-Note that the current editor, and its corresponding document, do not necessary correspond to the currently opened tab in the UI, because Brackets has a notion of inline editors which can come on top of the main, full size editor representing the currently opened document.
+Note that the current *Editor*, and its corresponding *Document* do not necessary correspond to the currently opened tab in the UI, because Brackets has a notion of inline editors which can come on top of the main, full size editor representing the currently opened document.
 
-Also, a word of warning: when getting access to a document, you need to call ```document.addRef()```javascript for reference counting, which seems a bit counter-intuitive to me, but again that might be just be me.
+Editors give complete access to write the content and selection of a document, abstracting the CodeMirror implementation. The underlying code mirror API can still be accessed directly through ```_codeMirror```, like when you use ```_codeMirror.replaceSelection(newString);```. You sometimes need to do that simply because the Editor API only covers a limited part of the CoreMirror features. In any case, if you want to get into Brackets, get prepared to spend some time in the CodeMirror API documentation.
 
-Editors give complete access to write the content of a document. They can let you read and set text selection using methods like ```Editor.getSelectedText()``` and ```Editor.setSelection(start, end)```. So, an Editor's job is pretty much to abstract the CodeMirror Implementation. 
+But, as a model, the `Document` API also exposes text editing operations, such as `setText()` or `replaceRange()`, which are delegated to its master editor (which itself delegates it to CodeMirror). So, to edit a *Document*, you can simply use its own API, regardless of editors.
 
-The underlying code mirror API can still be accessed directly through ```Editor._codeMirror```, like when you use ```Editor._codeMirror.replaceSelection(newString);```, and you'll often need to do that simply because the Editor API only covers a small part of the coreMirror features. In other words, if you want to get into Brackets, get prepared to spend a lot of the time in the CodeMirror API docs.
+```currentDoc.setText("Hello world");```
+
+Selection management, however, is related to a corresponding view so it's only available through the `Editor` object, using methods like `getSelectedText()` and `setSelection(start, end)`. Here's how you could set the selection of the document which currently has focus:
+
+```EditorManager.getFocusedEditor().setSelection({line:0, ch:0}, {line:0, ch:5});```
+
+Finally, a word of warning: if you need to keep a reference of a `Document` object, you have to call ```Document.addRef()``` for reference counting. This is a workaround to circumvent the lack of weak references in javascript.
 
 
 
@@ -94,18 +100,23 @@ One of things that make Brackets unique today is its so-called *Live Development
 
 At the heart of the implementation of Live Development is the `Inspector.js` file, which is in charge of the communication with Chrome's remote debugger API using JSON over WebSockets. Other elements involved in this process include Agents - which keep track of changes and propagate them- and Documents which, again, represent CSS, JS and HTML files on the system.
 
-The inline editor feature, which makes it possible to overlay some content over code, is implemented through the `MultiRangeInlineEditor` class. This class inherits from `InlineTextEditor` which itself inherits from `InlineWidget`.
+The *Inline Editor* feature, which makes it possible to overlay some content over code, is implemented through the `InlineWidget` class (the very basis of inline editors, which is just a panel floating over your code). The `InlineTextEditor` class is slightly more sophisticated: it inherits from `InlineWidget` and adds a simple text editor.
 
-However, you don't need to understand all this inheritance chain in details to use such an inline editor. All you have to do is register a provider function to the EditorManager, like this:
+The class you'd use to create an inline editor which contains a small selectable panel on the right, such as Brackets' default CSS inline editor, is the `MultiRangeInlineEditor`, which itself inherits from `InlineTextEditor`.
+
+To use such an *Inline Editor*, you have to register a provider function with the `EditorManager`, like this:
 ```
-EditorManager.registerInlineEditProvider(javaScriptFunctionProvider);
+EditorManager.registerInlineEditProvider(providerFunction);
 ```
 
-This function has to take two parameters: the host editor, and a position object. Position objects are used by CodeMirror, and contain two properties, the line number and the character position. Inside this function, you'll simply instantiate your `MultiRangeInlineEditor`, and pass it the corresponding editor object.
+This function has to take two parameters: the host editor, and a position object. Position objects are used by *CodeMirror*, and contain two properties, the line number and the character position. Inside this function, you'll simply instantiate your `MultiRangeInlineEditor`, and pass it the corresponding `Editor` instance.
 
 ```
-var myInlineEditor = new MultiRangeInlineEditor(data);
-myInlineEditor.load(hostEditor);
+function providerFunction(hostEditor, pos){
+	(…)
+    var myInlineEditor = new MultiRangeInlineEditor(data);
+    myInlineEditor.load(hostEditor);
+}
 ```
 
 
