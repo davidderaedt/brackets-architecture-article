@@ -62,7 +62,7 @@ Finally, there is a page on the wiki describing [code conventions used for Brack
 
 ## Code edition and document management 
 
-Most of what makes Brackets a tool for actually editing code comes from the use of a great third party project: [CodeMirror]((http://codemirror.net/). Everything regarding laying out a text document, to representing code and editing it in a proper way, comes from CodeMirror, including syntax highlighting and focus management. To be more accurate, Brackets uses a dedicated fork, [CoreMirror2](https://github.com/adobe/CodeMirror2), but my understanding is CodeMirror committers have begun accepting pull request from the fork.
+Most of what makes Brackets a tool for actually editing code comes from the use of a great third party project: [CodeMirror]((http://codemirror.net/). Everything regarding laying out a text document, to representing code and editing it in a proper way, comes from CodeMirror, including syntax highlighting and focus management. To be more accurate, Brackets uses a [dedicated fork]((https://github.com/adobe/CodeMirror2) of [CodeMirror2](https://github.com/marijnh/CodeMirror2), but my understanding is CodeMirror committers have begun accepting pull request from the fork.
 
 Document and project management, however, is handled separately. This is the logic responsible for things like defining a project, a working set, selecting a file and keeping track of open files inside that project. While this may seem trivial when put this way, this is actually a very central part of any software which job is to edit document. 
 
