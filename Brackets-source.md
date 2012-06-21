@@ -90,7 +90,7 @@ Selection management, however, is related to a corresponding view so it's only a
 
 ```EditorManager.getFocusedEditor().setSelection({line:0, ch:0}, {line:0, ch:5});```
 
-Finally, a word of warning: if you need to keep a reference of a `Document` object, you have to call ```Document.addRef()``` for reference counting. This is a workaround to circumvent the lack of weak references in javascript.
+Finally, a word of warning: As a workaround to circumvent the lack of weak references in javascriptif, when you need to keep a reference of a `Document` object, you have to call ```Document.addRef()```, and converslely, ```Document.releaseRef()``` when you're done). This includes event listeners attached to documents.
 
 
 
